@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Contact;
 
 class RSLApp extends Model
 {
@@ -26,4 +27,15 @@ class RSLApp extends Model
         'recipient',
         'sender_date',
     ];
+
+    public function senderContact()
+    {
+        return $this->belongsTo(Contact::class, 'sender_id', 'contact_id');
+    }
+
+    public function recipientContact()
+    {
+        return $this->belongsTo(Contact::class, 'recipient_id', 'contact_id');
+    }
+
 }

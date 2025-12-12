@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use App\Models\RSLApp;
 
 class Contact extends Model
 {
@@ -12,7 +14,6 @@ class Contact extends Model
 
     protected $primaryKey = 'contact_id';
 
-    // Daftar kolom yang boleh diisi (sesuaikan dengan kolom di DB)
     protected $fillable = [
         'name',
         'address',
@@ -21,4 +22,15 @@ class Contact extends Model
         'upper_contact_id',
         'type',
     ];
+
+    public function sentMails()
+    {
+        return $this->hasMany(RSLApp::class, 'sender_id', 'contact_id');
+    }
+
+    public function receivedMails()
+    {
+        return $this->hasMany(RSLApp::class, 'recipient_id', 'contact_id');
+    }
+
 }
