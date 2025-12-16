@@ -2,7 +2,7 @@
 
 namespace App\Providers\Filament;
 
-// use Filament\Http\Middleware\Authenticate;
+use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
@@ -28,46 +28,72 @@ class AdminPanelProvider extends PanelProvider
         return $panel
             ->default()
             ->id('admin')
-            ->path('/')
+            ->path('admin')
+            ->viteTheme('resources/css/filament/admin/theme.css')
             ->font('Poppins')
             ->maxContentWidth('full')
-            // ->login()
+            ->login()
+            ->brandName('Arsip Surat')
+            // ->brandLogo(asset('images/logo-perusahaan.png'))
+            // ->brandLogoHeight('3rem')
             ->renderHook(
-                PanelsRenderHook::HEAD_END,
+                \Filament\View\PanelsRenderHook::HEAD_END,
                 fn (): string => '<style>
-                    /* Sidebar Putih & ada Garis Batas */
-                    .fi-sidebar {
+                    /* Sidebar */
+                    :not(.dark) .fi-sidebar {
                         background-color: white !important;
-                        border-right: 1px solid #e5e7eb;
+                        border-right: 1px solid #e5e7eb !important;
                         box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
                     }
-                    
-                    /* Header (Topbar) Putih & ada Garis Batas */
-                    .fi-topbar {
+
+                    /* Header (Topbar) */
+                    :not(.dark) .fi-topbar {
                         background-color: white !important;
-                        border-bottom: 1px solid #e5e7eb;
+                        border-bottom: 1px solid #e5e7eb !important;
                     }
 
-                    /* Warna Latar Belakang Halaman (Abu muda biar kontras sama tabel) */
-                    .fi-main {
+                    /* Background Halaman Utama */
+                    :not(.dark) .fi-main {
                         background-color: #f9fafb !important;
                     }
 
-                    .fi-ta-ctn {
+                    /* Tabel & Kontainer Konten */
+                    :not(.dark) .fi-ta-ctn {
                         background-color: white !important;
                         border: 1px solid #e5e7eb !important;
                         box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05) !important;
-                        border-radius: 0.75rem !important; /* Sudut melengkung */
+                        border-radius: 0.75rem !important;
+                    }
+                    
+                    //Dark Mode
+                    .dark .fi-sidebar {
+                        background-color: #18181b !important;
+                        box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
+                        border-right: 1px solid #27272a !important; 
+                    }
+                    
+                    .dark .fi-topbar {
+                        background-color: #18181b !important;
+                        border-bottom: 1px solid #27272a !important;
+                    }
+
+                    .dark .fi-main {
+                        background-color: #030712 !important;
+                    }
+                    
+                    .dark .fi-ta-ctn {
+                        border: 1px solid #27272a !important;
                     }
                 </style>'
             )
+            ->darkMode(true)
             ->colors([
                 'primary' => Color::Amber,
             ])
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')
             ->pages([
-                // Dashboard::class,
+                Dashboard::class,
             ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\Filament\Widgets')
             ->widgets([
@@ -86,7 +112,7 @@ class AdminPanelProvider extends PanelProvider
                 DispatchServingFilamentEvent::class,
             ])
             ->authMiddleware([
-                // Authenticate::class,
+                Authenticate::class,
             ]);
     }
 }

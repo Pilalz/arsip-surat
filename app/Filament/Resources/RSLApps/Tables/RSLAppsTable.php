@@ -41,7 +41,10 @@ class RSLAppsTable
                     ->limit(30) // Batasi panjang teks biar rapi
                     ->searchable(),
                 
-                // TextColumn::make('subject2') ... (Opsional, kalau penuh mending hide)
+                TextColumn::make('subject2')
+                    ->label('Keterangan')
+                    ->limit(30)
+                    ->searchable(),
 
                 TextColumn::make('senderContact.name')
                     ->label('Sender')

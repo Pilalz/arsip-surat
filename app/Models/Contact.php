@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use App\Models\RSLApp;
 
 class Contact extends Model
@@ -21,7 +22,14 @@ class Contact extends Model
         'email',
         'upper_contact_id',
         'type',
+        'id_number',
+        'description',
     ];
+
+    public function upperContact(): BelongsTo
+    {
+        return $this->belongsTo(Contact::class, 'upper_contact_id', 'contact_id');
+    }
 
     public function sentMails()
     {

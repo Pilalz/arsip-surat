@@ -26,6 +26,7 @@ class RSLApp extends Model
         'recipient_id',
         'recipient',
         'sender_date',
+        'photo',
     ];
 
     public function senderContact()
