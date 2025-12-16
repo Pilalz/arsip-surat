@@ -22,8 +22,8 @@ class ContactInfolist
                         TextEntry::make('email')
                             ->label('Email address')
                             ->placeholder('-'),
-                        TextEntry::make('upper_contact_id')
-                            ->numeric()
+                        TextEntry::make('upperContact.name')
+                            ->label('Atasan')
                             ->placeholder('-'),
                     ]),
 
