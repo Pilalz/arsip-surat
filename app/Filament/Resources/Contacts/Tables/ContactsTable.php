@@ -46,16 +46,26 @@ class ContactsTable
                 TextColumn::make('email')
                     ->label('Email')
                     ->icon('heroicon-m-envelope')
-                    ->copyable()
-                    ->toggleable(isToggledHiddenByDefault: true), // Sembunyikan default biar ga penuh
+                    ->copyable(),
 
-                // MENAMPILKAN NAMA INDUK (BUKAN ANGKA ID)
-                // Pastikan kamu punya relasi 'parent' di Model Contact ya
-                TextColumn::make('parent.name') 
+                TextColumn::make('upperContact.name') 
                     ->label('Induk/Atasan')
                     ->placeholder('-')
-                    ->description(fn (Contact $record) => $record->upper_contact_id ? 'ID: ' . $record->upper_contact_id : null)
                     ->sortable(),
+
+                TextColumn::make('address')
+                    ->label('Address')
+                    ->icon('heroicon-m-map-pin')
+                    ->toggleable(isToggledHiddenByDefault: true),
+
+                TextColumn::make('id_number')
+                    ->label('ID')
+                    ->icon('heroicon-m-identification')
+                    ->toggleable(isToggledHiddenByDefault: true),
+
+                TextColumn::make('description')
+                    ->label('Description')
+                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
                 SelectFilter::make('type')
