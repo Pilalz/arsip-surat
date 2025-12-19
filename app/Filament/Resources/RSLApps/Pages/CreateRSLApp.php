@@ -4,6 +4,7 @@ namespace App\Filament\Resources\RSLApps\Pages;
 
 use App\Filament\Resources\RSLApps\RSLAppResource;
 use Filament\Resources\Pages\CreateRecord;
+use Filament\Notifications\Notification;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use App\Models\Contact;
@@ -14,26 +15,51 @@ class CreateRSLApp extends CreateRecord
 {
     protected static string $resource = RSLAppResource::class;
 
+    protected array $tempStatuses = [];
+
     protected function mutateFormDataBeforeCreate(array $data): array
     {
-        // Cek foto
-        if (isset($data['photo']) && $data['photo']) {
-            
-            // Cek Base64
-            if (preg_match('/^data:image\/(\w+);base64,/', $data['photo'], $type)) {
-                $base64Data = substr($data['photo'], strpos($data['photo'], ',') + 1);
-                $extension = strtolower($type[1]);
-                $fileData = base64_decode($base64Data);
+        $statuses = $data['mailStatuses'] ?? [];
 
-                if ($fileData !== false) {
-                    $fileName = 'surat-photos/' . Str::random(40) . '.' . $extension;
-                    Storage::disk('local')->put($fileName, $fileData);
-                    
-                    // Ganti data dengan nama file
-                    $data['photo'] = $fileName;
+        // 3. Proses Foto (Logic Loop yang tadi)
+        foreach ($statuses as $key => $statusItem) {
+            // Ambil data foto dari salah satu sumber
+            $photoData = $statusItem['temp_photo_camera'] ?? $statusItem['temp_photo_upload'] ?? null;
+            $finalFileName = null;
+
+            if ($photoData) {
+                // Cek Base64 (Dari Kamera)
+                if (preg_match('/^data:image\/(\w+);base64,/', $photoData, $type)) {
+                    $base64Data = substr($photoData, strpos($photoData, ',') + 1);
+                    $extension = strtolower($type[1]);
+                    $fileData = base64_decode($base64Data);
+
+                    if ($fileData !== false) {
+                        $fileName = 'status-photos/' . Str::random(40) . '.' . $extension;
+                        Storage::disk('local')->put($fileName, $fileData);
+                        $finalFileName = $fileName;
+                    }
+                } 
+                // Cek jika Upload Biasa (sudah berupa path)
+                else {
+                    $finalFileName = $photoData;
                 }
             }
+
+            // Simpan nama file foto ke array lokal
+            $statuses[$key]['photo'] = $finalFileName;            
+
+            // Hapus field sampah agar bersih
+            unset($statuses[$key]['temp_photo_camera']);
+            unset($statuses[$key]['temp_photo_upload']);
+            unset($statuses[$key]['upload_method']);
         }
+
+        // Simpan ke Property Class untuk dipakai di afterCreate
+        $this->tempStatuses = $statuses;
+
+        // HAPUS dari $data utama agar tidak error SQL (karena kolom mailStatuses tidak ada di tabel RSLApp)
+        unset($data['mailStatuses']);
 
         if (!empty($data['sender_id'])) {
             $contact = Contact::find($data['sender_id']);
@@ -57,37 +83,52 @@ class CreateRSLApp extends CreateRecord
     {
         $record = $this->getRecord();
 
+        if (!empty($this->tempStatuses)) {
+            foreach ($this->tempStatuses as $status) {
+                // Buat baris baru di table anak
+                $record->mailStatuses()->create([
+                    'status' => $status['status'],
+                    'date'   => $status['date'],
+                    'time'   => $status['time'],
+                    'photo'  => $status['photo'] ?? null,
+                ]);
+            }
+        }
+
         if ($record->mail_type === 'incoming') {
-            
-            $recipientEmail = $record->recipientContact?->email;
-            $recipientDirectEmail = $record->recipientContact?->upperContact?->email;
 
-            if ($recipientEmail) {
-                try {
-                    $mail = Mail::to($recipientEmail);
+            $userEmail = $record->recipientContact?->email;
+            $userCCEmail = $record->recipientContact?->upperContact?->email;
+        
+        } elseif ($record->mail_type === 'outgoing') {
+            $userEmail = $record->senderContact?->email;
+            $userCCEmail = $record->senderContact?->upperContact?->email;
+        }
 
-                    if ($recipientDirectEmail) {
-                        $mail->cc($recipientDirectEmail);
-                    }
+        if ($userEmail) {
+            try {
+                $mail = Mail::to($userEmail);
 
-                    $mail->send(new IncomingMailNotification($record));
-                    
-                    // (Opsional) Beri notifikasi sukses ke Admin di layar
-                    \Filament\Notifications\Notification::make()
-                        ->title('Email terkirim ke ' . $recipientEmail)
-                        ->body($recipientDirectEmail ? "(CC ke atasan: $recipientDirectEmail)" : null)
-                        ->success()
-                        ->send();
-                        
-                } catch (\Exception $e) {
-                    // Jika gagal kirim (misal internet mati), jangan bikin error aplikasi
-                    // Cukup log error-nya atau beri notifikasi warning
-                    \Filament\Notifications\Notification::make()
-                        ->title('Gagal mengirim email')
-                        ->body($e->getMessage())
-                        ->warning()
-                        ->send();
+                if ($userCCEmail) {
+                    $mail->cc($userCCEmail);
                 }
+
+                $latestStatus = !empty($this->tempStatuses) ? end($this->tempStatuses) : [];
+
+                $mail->send(new IncomingMailNotification($record, $latestStatus));
+                
+                Notification::make()
+                    ->title('Email terkirim ke ' . $userEmail)
+                    ->body($userCCEmail ? "(CC ke atasan: $userCCEmail)" : null)
+                    ->success()
+                    ->send();
+                    
+            } catch (\Exception $e) {
+                Notification::make()
+                    ->title('Gagal mengirim email')
+                    ->body($e->getMessage())
+                    ->warning()
+                    ->send();
             }
         }
     }

@@ -19,15 +19,13 @@ class ContactsTable
         return $table
             ->columns([
                 TextColumn::make('name')
-                    ->label('Nama Kontak')
                     ->weight('bold') // Tebalkan nama
                     ->icon('heroicon-m-user')
                     ->searchable()
                     ->sortable(),
 
                 TextColumn::make('type')
-                    ->label('Tipe')
-                    ->badge() // Ubah jadi Badge warna-warni
+                    ->badge()
                     ->colors([
                         'info' => 'internal',
                         'warning' => 'external',
@@ -38,23 +36,20 @@ class ContactsTable
                     ]),
 
                 TextColumn::make('phone')
-                    ->label('Telepon')
                     ->icon('heroicon-m-phone')
-                    ->copyable() // Biar bisa dicopy user
+                    ->copyable()
                     ->searchable(),
 
                 TextColumn::make('email')
-                    ->label('Email')
                     ->icon('heroicon-m-envelope')
-                    ->copyable(),
+                    ->copyable()
+                    ->searchable(),
 
                 TextColumn::make('upperContact.name') 
-                    ->label('Induk/Atasan')
-                    ->placeholder('-')
-                    ->sortable(),
+                    ->label('Supervisor')
+                    ->placeholder('-'),
 
                 TextColumn::make('address')
-                    ->label('Address')
                     ->icon('heroicon-m-map-pin')
                     ->toggleable(isToggledHiddenByDefault: true),
 
@@ -64,7 +59,6 @@ class ContactsTable
                     ->toggleable(isToggledHiddenByDefault: true),
 
                 TextColumn::make('description')
-                    ->label('Description')
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([

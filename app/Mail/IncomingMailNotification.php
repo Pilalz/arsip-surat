@@ -10,17 +10,20 @@ use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Mail\Mailables\Attachment;
 use Illuminate\Queue\SerializesModels;
 use App\Models\RSLApp;
+use Illuminate\Support\Facades\Storage;
 
 class IncomingMailNotification extends Mailable
 {
     use Queueable, SerializesModels;
 
+    public $newStatus;
+
     /**
      * Create a new message instance.
      */
-    public function __construct(public RSLApp $record)
+    public function __construct(public RSLApp $record, array $newStatus)
     {
-        
+        $this->newStatus = $newStatus;
     }
 
     /**
@@ -29,8 +32,7 @@ class IncomingMailNotification extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            // Judul Email
-            subject: 'Pemberitahuan Surat Masuk Baru - ' . $this->record->mail_number,
+            subject: 'Pemberitahuan Surat ' .  ($this->record->mail_type === "incoming" ? 'Masuk' : 'Keluar') . ' - ' . ($this->newStatus['status']) . ' - ' . $this->record->mail_number,
         );
     }
 
@@ -40,7 +42,6 @@ class IncomingMailNotification extends Mailable
     public function content(): Content
     {
         return new Content(
-            // Nama file tampilan (View) yang akan kita buat di langkah 3
             view: 'mail.incoming-notification',
         );
     }
@@ -52,10 +53,14 @@ class IncomingMailNotification extends Mailable
      */
     public function attachments(): array
     {
-        if ($this->record->photo) {
+        $photoPath = $this->newStatus['photo'] ?? null;
+
+        if ($photoPath && Storage::disk('local')->exists($photoPath)) {
+            
+            $filename = basename($photoPath);
             return [
-                Attachment::fromStorageDisk('local', $this->record->photo)
-                    ->as('Lampiran-Surat.jpg')
+                Attachment::fromStorageDisk('local', $photoPath)
+                    ->as('Bukti-Status-' . $filename)
                     ->withMime('image/jpeg'),
             ];
         }

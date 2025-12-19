@@ -33,7 +33,7 @@ class AdminPanelProvider extends PanelProvider
             ->font('Poppins')
             ->maxContentWidth('full')
             ->login()
-            ->brandName('Arsip Surat')
+            ->brandName('Mail Management')
             // ->brandLogo(asset('images/logo-perusahaan.png'))
             // ->brandLogoHeight('3rem')
             ->renderHook(

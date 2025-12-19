@@ -3,7 +3,10 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use App\Models\Contact;
+use App\Models\MailStatus;
 
 class RSLApp extends Model
 {
@@ -29,14 +32,19 @@ class RSLApp extends Model
         'photo',
     ];
 
-    public function senderContact()
+    public function senderContact(): BelongsTo
     {
         return $this->belongsTo(Contact::class, 'sender_id', 'contact_id');
     }
 
-    public function recipientContact()
+    public function recipientContact(): BelongsTo
     {
         return $this->belongsTo(Contact::class, 'recipient_id', 'contact_id');
+    }
+
+    public function mailStatuses(): HasMany
+    {
+        return $this->hasMany(MailStatus::class, 'mail_id', 'mail_id');
     }
 
 }

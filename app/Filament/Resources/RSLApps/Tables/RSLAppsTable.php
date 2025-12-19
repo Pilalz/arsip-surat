@@ -9,7 +9,10 @@ use Filament\Actions\ViewAction;
 use Filament\Actions\DeleteAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Filters\Filter;
 use Filament\Tables\Table;
+use Filament\Forms\Components\DatePicker;
+use Illuminate\Database\Eloquent\Builder;
 
 // Hapus use Section karena tidak dipakai di Table
 // use Filament\Schemas\Components\Section; 
@@ -19,9 +22,8 @@ class RSLAppsTable
     public static function configure(Table $table): Table
     {
         return $table
+            ->defaultSort('date', 'desc')
             ->columns([
-                // --- LANGSUNG LIST KOLOMNYA DI SINI (JANGAN PAKE SECTION) ---
-                
                 TextColumn::make('mail_number')
                     ->searchable(),
                 
@@ -38,21 +40,27 @@ class RSLAppsTable
                 
                 TextColumn::make('subject1')
                     ->label('Subject')
-                    ->limit(30) // Batasi panjang teks biar rapi
-                    ->searchable(),
+                    ->limit(30),
                 
                 TextColumn::make('subject2')
                     ->label('Keterangan')
                     ->limit(30)
-                    ->searchable(),
+                    ->searchable()
+                    ->placeholder('-'),
 
-                TextColumn::make('senderContact.name')
+                TextColumn::make('sender_info')
                     ->label('Sender')
-                    ->searchable(),
+                    ->searchable()
+                    ->state(function ($record) {
+                        return $record->senderContact->name ?? $record->sender;
+                    }),
 
-                TextColumn::make('recipientContact.name')
+                TextColumn::make('recipient_info')
                     ->label('Recipient')
-                    ->searchable(),
+                    ->searchable()
+                    ->state(function ($record) {
+                        return $record->recipientContact->name ?? $record->recipient;
+                    }),
 
                 TextColumn::make('sender_date')
                     ->date()
@@ -64,7 +72,45 @@ class RSLAppsTable
                         'incoming' => 'Incoming',
                         'outgoing' => 'Outgoing',
                     ])
-                    ->preload()
+                    ->preload(),
+
+                SelectFilter::make('subject1')
+                    ->label('Subject')
+                    ->options([
+                        'purchasing' => 'Purchasing',
+                        'non purchasing' => 'Non Purchasing',
+                    ])
+                    ->preload(),
+
+                Filter::make('date')
+                    ->form([
+                        DatePicker::make('created_from')
+                            ->label('Dari Tanggal'),
+                        DatePicker::make('created_until')
+                            ->label('Sampai Tanggal'),
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        return $query
+                            ->when(
+                                $data['created_from'],
+                                fn (Builder $query, $date) => $query->whereDate('date', '>=', $date),
+                            )
+                            ->when(
+                                $data['created_until'],
+                                fn (Builder $query, $date) => $query->whereDate('date', '<=', $date),
+                            );
+                    })
+                    // Opsional: Tampilkan indikator kalau filter aktif
+                    ->indicateUsing(function (array $data): array {
+                        $indicators = [];
+                        if ($data['created_from'] ?? null) {
+                            $indicators['created_from'] = 'Dari: ' . \Carbon\Carbon::parse($data['created_from'])->toFormattedDateString();
+                        }
+                        if ($data['created_until'] ?? null) {
+                            $indicators['created_until'] = 'Sampai: ' . \Carbon\Carbon::parse($data['created_until'])->toFormattedDateString();
+                        }
+                        return $indicators;
+                    }),
             ])
             ->actions([
                 ViewAction::make()->iconButton(),   // Pakai iconButton biar rapi

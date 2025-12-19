@@ -14,7 +14,7 @@ Route::get('/login', function () {
 Route::get('/private-image/{filename}', function ($filename) {
     
     // Tentukan path relatif di dalam disk
-    $path = 'surat-photos/' . $filename;
+    $path = 'status-photos/' . $filename;
 
     // 1. Debugging: Cek dulu apakah Storage mengenalinya
     if (!Storage::disk('local')->exists($path)) {

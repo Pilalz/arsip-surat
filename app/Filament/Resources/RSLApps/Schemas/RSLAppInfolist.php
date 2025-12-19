@@ -2,7 +2,10 @@
 
 namespace App\Filament\Resources\RSLApps\Schemas;
 
+use Filament\Infolists\Components\RepeatableEntry;
 use Filament\Infolists\Components\TextEntry;
+use Filament\Infolists\Components\ViewEntry;
+use Filament\Infolists\Components\Entry;
 use Filament\Schemas\Components\Section;
 use Filament\Support\Enums\FontWeight;
 use Filament\Support\Enums\TextSize;
@@ -26,89 +29,105 @@ class RSLAppInfolist
                             ->icon('heroicon-m-document-text')
                             ->copyable(), // Biar user bisa copy nomor surat
                         
-                        TextEntry::make('mail_type')
-                            ->hiddenLabel()
-                            ->badge()
-                            ->colors([
-                                'success' => 'incoming',
-                                'warning' => 'outgoing',
-                            ])
-                            ->icons([
-                                'heroicon-m-arrow-down-tray' => 'incoming',
-                                'heroicon-m-paper-airplane' => 'outgoing',
-                            ])
-                            ->alignRight(),
-
-                        TextEntry::make('date')
-                            ->hiddenLabel()
-                            ->date('d F Y')
-                            ->icon('heroicon-m-calendar')
-                            ->alignRight()
-                            ->color('gray'),
-                    ]),
-
-                // --- BAGIAN 2: DETAIL SURAT (2 Kolom) ---
-                Section::make('Detail Isi Surat')
-                    ->icon('heroicon-m-bars-3-bottom-left')
-                    ->columns(2)
-                    ->schema([
-                        TextEntry::make('subject1')
-                            ->label('Kategori')
-                            ->badge()
-                            ->color('info'),
-
-                        TextEntry::make('subject2')
-                            ->label('Keterangan Tambahan')
-                            ->placeholder('-')
-                            ->visible(fn ($record) => $record->subject2), 
-                    ]),
-
-                // --- BAGIAN 3: PELAKU SURAT (Grid 2 Kolom) ---
-                Grid::make(2)
-                    ->schema([
-                        // KOTAK PENGIRIM
-                        Section::make('Pengirim (Sender)')
-                            ->icon('heroicon-m-user')
+                        Grid::make(2)
                             ->schema([
-                                TextEntry::make('sender_info')
-                                    ->label('Nama Pengirim')
-                                    ->weight(FontWeight::SemiBold)
-                                    ->state(function ($record) {
-                                        return $record->senderContact->name ?? $record->sender;
-                                    }),
-                                
-                                TextEntry::make('sender_date')
-                                    ->label('Tanggal Kirim')
-                                    ->date('d M Y')
-                                    ->icon('heroicon-m-clock')
-                                    ->placeholder('-'),
-                            ])->columnSpan(1),
+                                TextEntry::make('mail_type')
+                                    ->hiddenLabel()
+                                    ->badge()
+                                    ->colors([
+                                        'success' => 'incoming',
+                                        'warning' => 'outgoing',
+                                    ])
+                                    ->icons([
+                                        'heroicon-m-arrow-down-tray' => 'incoming',
+                                        'heroicon-m-paper-airplane' => 'outgoing',
+                                    ]),
 
-                        // KOTAK PENERIMA
-                        Section::make('Penerima (Recipient)')
-                            ->icon('heroicon-m-user-group')
+                                TextEntry::make('date')
+                                    ->hiddenLabel()
+                                    ->date('d F Y')
+                                    ->icon('heroicon-m-calendar')
+                                    ->color('gray'),
+
+                                TextEntry::make('subject1')
+                                    ->label('Kategori')
+                                    ->badge()
+                                    ->color('info'),
+
+                                TextEntry::make('subject2')
+                                    ->label('Keterangan Tambahan')
+                                    ->placeholder('-')
+                                    ->visible(fn ($record) => $record->subject2), 
+                            ]),
+                        
+                        Grid::make(2)
                             ->schema([
-                                TextEntry::make('recipientContact.name')
-                                    ->weight(FontWeight::SemiBold)
-                                    ->label('Nama'),
-                            ])->columnSpan(1),
+                                // KOTAK PENGIRIM
+                                Section::make('Pengirim (Sender)')
+                                    ->icon('heroicon-m-user')
+                                    ->schema([
+                                        TextEntry::make('sender_info')
+                                            ->label('Nama Pengirim')
+                                            ->weight(FontWeight::SemiBold)
+                                            ->state(function ($record) {
+                                                return $record->senderContact->name ?? $record->sender;
+                                            }),
+                                        
+                                        TextEntry::make('sender_date')
+                                            ->label('Tanggal Kirim')
+                                            ->date('d M Y')
+                                            ->icon('heroicon-m-clock')
+                                            ->placeholder('-'),
+                                    ])->columnSpan(1),
+
+                                // KOTAK PENERIMA
+                                Section::make('Penerima (Recipient)')
+                                    ->icon('heroicon-m-user-group')
+                                    ->schema([
+                                        TextEntry::make('recipient_info')
+                                            ->label('Nama')
+                                            ->weight(FontWeight::SemiBold)
+                                            ->state(function ($record) {
+                                                return $record->recipientContact->name ?? $record->recipient;
+                                            }),
+                                    ])->columnSpan(1),
+                            ]),
                     ]),
 
-                // --- BAGIAN 4: BUKTI FOTO (Secure Image) ---
-                Section::make('Lampiran Bukti')
+                Section::make('Status & Photo')
                     ->icon('heroicon-m-photo')
-                    ->collapsible()
+                    // ->collapsible()
                     ->schema([
-                        ImageEntry::make('photo')
-                            ->hiddenLabel()
-                            ->state(fn ($record) => $record->photo ? route('view.private.image', ['filename' => basename($record->photo)]) : null)
-                            ->extraImgAttributes([
-                                'class' => 'rounded-lg shadow-md border border-gray-200 w-full h-full',
-                                'style' => 'object-fit: contain;',
+                        RepeatableEntry::make('mailStatuses') // <--- WAJIB SAMA dengan nama fungsi relasi di Model RSLApp
+                            ->schema([
+                                // Kita bagi layout per item jadi 2 kolom: Kiri (Info), Kanan (Foto)
+                                Grid::make(2)
+                                    ->schema([
+                                        TextEntry::make('status')
+                                            ->weight(\Filament\Support\Enums\FontWeight::Bold)
+                                            ->badge() // Biar tampilannya kotak berwarna
+                                            ->color('info'), // Atau bisa dikasih logic warna
+                                        
+                                        TextEntry::make('date')
+                                            ->icon('heroicon-m-calendar')
+                                            ->date('d F Y'),
+
+                                        TextEntry::make('time')
+                                            ->icon('heroicon-m-clock')
+                                            ->time('H:i'),
+
+                                        Entry::make('photo_lightbox') 
+                                            ->label('Lampiran Bukti') // Label kolom
+                                            ->hiddenLabel()
+                                            ->view('infolists.components.lightbox-image'),
+                                    ])
+                                    ->columnSpanFull(),
                             ])
-                            ->checkFileExistence(false)
-                            ->placeholder('Tidak ada lampiran foto.'),
                     ]),
+
+                    ViewEntry::make('global_lightbox')
+                        ->view('filament.components.global-lightbox')
+                        ->hiddenLabel(),
             ]);
     }
 }

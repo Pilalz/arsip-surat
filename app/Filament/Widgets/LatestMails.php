@@ -27,7 +27,7 @@ class LatestMails extends BaseWidget
             )
             ->columns([
                 TextColumn::make('mail_number')
-                    ->label('No. Surat')
+                    ->label('Mail Number')
                     ->weight('bold'),
 
                 TextColumn::make('mail_type')
@@ -38,21 +38,26 @@ class LatestMails extends BaseWidget
                     ]),
 
                 TextColumn::make('date')
-                    ->date('d M Y')
-                    ->label('Tanggal'),
+                    ->date('d M Y'),
 
                 TextColumn::make('subject1')
                     ->label('Subject'),
 
                 TextColumn::make('subject2')
-                    ->label('Keterangan')
+                    ->label('Description')
                     ->placeholder('-'),
 
-                TextColumn::make('senderContact.name')
-                    ->label('Sender'),
+                TextColumn::make('sender_info')
+                    ->label('Sender')
+                    ->state(function ($record) {
+                        return $record->senderContact->name ?? $record->sender;
+                    }),
                 
-                TextColumn::make('recipientContact.name')
-                    ->label('Recipient'),
+                TextColumn::make('recipient_info')
+                    ->label('Recipient')
+                    ->state(function ($record) {
+                        return $record->recipientContact->name ?? $record->recipient;
+                    }),
             ])
             ->paginated(false); // Matikan pagination karena cuma 5 data
     }
