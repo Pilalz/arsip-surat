@@ -112,12 +112,12 @@ class RSLAppForm
                                     ->pluck('item_name', 'item_name')
                                 ),
 
-                            DatePicker::make('date')
+                            Hidden::make('date')
                                 ->default(now())
                                 ->required(),
 
-                            TimePicker::make('time')
-                                ->default(now())
+                            Hidden::make('time')
+                                ->default(now('Asia/Jakarta')->format('H:i'))
                                 ->required(),
 
                             Hidden::make('photo'),

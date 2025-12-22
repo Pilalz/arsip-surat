@@ -106,12 +106,12 @@ class CreateRSLApp extends CreateRecord
         }
 
         // if ($record->subject1 === 'purchasing') {
+        //     $userCCEmail = "dini.indriasari@borneo.co.id";
         
         // } elseif ($record->subject1 === 'outgoing') {
+        //     $userCCEmail = "erry.nurima@borneo.co.id";
             
         // }
-
-        // dini.indriasari@borneo.co.id
 
         if ($userEmail) {
             try {
