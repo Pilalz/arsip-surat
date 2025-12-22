@@ -32,11 +32,17 @@ class RSLAppForm
                 ->schema([
                     TextInput::make('mail_number')
                     ->required(),
+                    DatePicker::make('date')
+                        ->label('Receiving Date')
+                        ->default(today())
+                        ->required(),
                     Select::make('mail_type')
+                        ->label('Mail Category')
                         ->options([
                             'incoming' => 'Incoming',
                             'outgoing' => 'Outgoing',
                         ])
+                        ->default('incoming')
                         ->required()
                         ->live()
                         ->native(true)
@@ -47,9 +53,8 @@ class RSLAppForm
                             if ($state === 'outgoing') $set('recipient_id', null);
                             if ($state === 'incoming') $set('recipient', null);
                         }),
-                    DatePicker::make('date')
-                        ->required(),
                     Select::make('subject1')
+                        ->label('Subject 1')
                         ->options([
                             'purchasing' => 'Purchasing',
                             'non purchasing' => 'Non-Purchasing',
@@ -66,6 +71,9 @@ class RSLAppForm
                         ->label('Subject 2')
                         ->visible(fn ($get) => $get('subject1') === 'non purchasing')
                         ->required(fn ($get) => $get('subject1') === 'non purchasing'),
+                    DatePicker::make('sender_date')
+                        ->label('Sender Date')
+                        ->required(),
                     Select::make('sender_id')
                         ->label('Sender')
                         ->relationship('senderContact', 'name')
@@ -86,8 +94,6 @@ class RSLAppForm
                     TextInput::make('recipient')
                         ->visible(fn ($get) => $get('mail_type') === 'outgoing')
                         ->required(fn ($get) => $get('mail_type') === 'outgoing'),
-                    DatePicker::make('sender_date')
-                        ->label('Mail Date'),
                 ]),
                 // Opsional: Hilangkan shadow bawaan section kalau mau flat
                 // ->compact() 
@@ -104,7 +110,6 @@ class RSLAppForm
                             
                             // --- PILIH STATUS DARI TABLE MAILMASTER ---
                             Select::make('status')
-                                ->label('Mail Status')
                                 ->searchable()
                                 ->required()
                                 ->columnSpanFull()
@@ -123,12 +128,12 @@ class RSLAppForm
                             Hidden::make('photo'),
 
                             Radio::make('upload_method')
-                                ->label('Photo Source')
+                                ->label('File Source')
                                 ->options([
-                                    'camera' => 'Camera',
                                     'upload' => 'Upload File',
+                                    'camera' => 'Camera',
                                 ])
-                                ->default('camera')
+                                ->default('upload')
                                 ->inline()
                                 ->live()
                                 ->columnSpanFull()
@@ -146,7 +151,7 @@ class RSLAppForm
 
                             // 3. Input Upload File
                             FileUpload::make('temp_photo_upload')
-                                ->label('Pilih File')
+                                ->hiddenLabel()
                                 ->columnSpanFull()
                                 ->directory('status-photos') // Simpan file upload di sini
                                 ->visible(fn ($get) => $get('upload_method') === 'upload'),

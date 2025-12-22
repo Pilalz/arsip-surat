@@ -15,6 +15,8 @@ class CreateRSLApp extends CreateRecord
 {
     protected static string $resource = RSLAppResource::class;
 
+    protected static ?string $title = 'Input';
+
     protected array $tempStatuses = [];
 
     protected function mutateFormDataBeforeCreate(array $data): array
