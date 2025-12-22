@@ -31,8 +31,8 @@ class RSLAppResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
     
-    protected static ?string $modelLabel = 'Mail'; 
-    protected static ?string $pluralModelLabel = 'Mail';
+    protected static ?string $modelLabel = 'Input'; 
+    protected static ?string $pluralModelLabel = 'Input';
     protected static ?string $navigationLabel = 'Mail';
 
     protected static ?int $navigationSort = 1;

@@ -99,6 +99,7 @@ class RSLAppForm
                     //         ->required()
 
                     Repeater::make('mailStatuses')
+                        ->hiddenLabel()
                         ->schema([
                             
                             // --- PILIH STATUS DARI TABLE MAILMASTER ---

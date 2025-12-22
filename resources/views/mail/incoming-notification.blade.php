@@ -29,7 +29,7 @@
     </table>
 
     <p>Terima kasih,<br>
-    Admin Arsip</p>
+    Mail Management Admin</p>
 
 </body>
 </html>
