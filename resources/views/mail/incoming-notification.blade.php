@@ -24,7 +24,7 @@
         </tr>
         <tr>
             <td><strong>Perihal</strong></td>
-            <td>: {{ $record->subject1 }} {{ $record->subject2 ? '- '.$record->subject2 : '' }}</td>
+            <td>: {{ ucwords(strtolower($record->subject1)) }} {{ $record->subject2 ? '- '.ucwords(strtolower($record->subject2)) : '' }}</td>
         </tr>
     </table>
 
