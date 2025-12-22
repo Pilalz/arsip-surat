@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\Storage;
 use App\Models\Contact;
 use App\Models\MailStatus;
 
@@ -31,6 +32,28 @@ class RSLApp extends Model
         'sender_date',
         'photo',
     ];
+
+    protected static function booted(): void
+    {
+        static::deleting(function (RSLApp $rslApp) {
+            
+            // 1. Loop semua status anak (mailStatuses)
+            foreach ($rslApp->mailStatuses as $status) {
+                // Hapus File Foto Status jika ada
+                if ($status->photo) {
+                    Storage::disk('local')->delete($status->photo);
+                }
+                
+                // Hapus Row Status (Optional jika DB tidak cascade)
+                $status->delete(); 
+            }
+
+            // 2. Hapus Foto Utama (RSLApp)
+            if ($rslApp->photo) {
+                Storage::disk('local')->delete($rslApp->photo);
+            }
+        });
+    }
 
     public function senderContact(): BelongsTo
     {

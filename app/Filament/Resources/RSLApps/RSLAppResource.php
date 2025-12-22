@@ -109,13 +109,4 @@ class RSLAppResource extends Resource
         // 6. Kembalikan PATH-nya saja untuk disimpan di Database
         return $fileName;
     }
-
-    public static function afterDelete(Model $record): void
-    {
-        // Cek apakah data ini punya foto
-        if ($record->photo) {
-            // Hapus file fisik dari storage local
-            Storage::disk('local')->delete($record->photo);
-        }
-    }
 }
