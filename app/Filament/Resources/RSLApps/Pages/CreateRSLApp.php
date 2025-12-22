@@ -105,6 +105,14 @@ class CreateRSLApp extends CreateRecord
             $userCCEmail = $record->senderContact?->upperContact?->email;
         }
 
+        // if ($record->subject1 === 'purchasing') {
+        
+        // } elseif ($record->subject1 === 'outgoing') {
+            
+        // }
+
+        // dini.indriasari@borneo.co.id
+
         if ($userEmail) {
             try {
                 $mail = Mail::to($userEmail);

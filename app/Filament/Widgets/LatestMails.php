@@ -35,13 +35,15 @@ class LatestMails extends BaseWidget
                     ->colors([
                         'success' => 'incoming',
                         'warning' => 'outgoing',
-                    ]),
+                    ])
+                    ->formatStateUsing(fn ($state) => ucwords(strtolower($state))),
 
                 TextColumn::make('date')
                     ->date('d M Y'),
 
                 TextColumn::make('subject1')
-                    ->label('Subject'),
+                    ->label('Subject')
+                    ->formatStateUsing(fn ($state) => ucwords(strtolower($state))),
 
                 TextColumn::make('subject2')
                     ->label('Description')

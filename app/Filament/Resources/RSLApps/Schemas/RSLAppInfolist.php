@@ -41,7 +41,8 @@ class RSLAppInfolist
                                     ->icons([
                                         'heroicon-m-arrow-down-tray' => 'incoming',
                                         'heroicon-m-paper-airplane' => 'outgoing',
-                                    ]),
+                                    ])
+                                    ->formatStateUsing(fn ($state) => ucwords(strtolower($state))),
 
                                 TextEntry::make('date')
                                     ->hiddenLabel()
@@ -52,7 +53,8 @@ class RSLAppInfolist
                                 TextEntry::make('subject1')
                                     ->label('Kategori')
                                     ->badge()
-                                    ->color('info'),
+                                    ->color('info')
+                                    ->formatStateUsing(fn ($state) => ucwords(strtolower($state))),
 
                                 TextEntry::make('subject2')
                                     ->label('Keterangan Tambahan')
@@ -105,8 +107,9 @@ class RSLAppInfolist
                                     ->schema([
                                         TextEntry::make('status')
                                             ->weight(\Filament\Support\Enums\FontWeight::Bold)
-                                            ->badge() // Biar tampilannya kotak berwarna
-                                            ->color('info'), // Atau bisa dikasih logic warna
+                                            ->badge()
+                                            ->color('info')
+                                            ->formatStateUsing(fn ($state) => ucwords(strtolower($state))),
                                         
                                         TextEntry::make('date')
                                             ->icon('heroicon-m-calendar')

@@ -32,7 +32,8 @@ class RSLAppsTable
                     ->colors([
                         'success' => 'incoming',
                         'warning' => 'outgoing',
-                    ]),
+                    ])
+                    ->formatStateUsing(fn ($state) => ucwords(strtolower($state))),
                 
                 TextColumn::make('date')
                     ->date()
@@ -40,10 +41,11 @@ class RSLAppsTable
                 
                 TextColumn::make('subject1')
                     ->label('Subject')
-                    ->limit(30),
+                    ->limit(30)
+                    ->formatStateUsing(fn ($state) => ucwords(strtolower($state))),
                 
                 TextColumn::make('subject2')
-                    ->label('Keterangan')
+                    ->label('Description')
                     ->limit(30)
                     ->searchable()
                     ->placeholder('-'),
