@@ -33,7 +33,11 @@ class RSLAppForm
                     TextInput::make('mail_number')
                     ->required(),
                     DatePicker::make('date')
-                        ->label('Receiving Date')
+                        ->label(fn ($get) => match ($get('mail_type')) {
+                            'incoming' => 'Receiving Date',
+                            'outgoing' => 'Sending Date',
+                            default => 'Receiving Date',
+                        })
                         ->default(today())
                         ->required(),
                     Select::make('mail_type')
@@ -49,6 +53,7 @@ class RSLAppForm
                         ->afterStateUpdated(function ($state, $set) {
                             if ($state === 'incoming') $set('sender_id', null);
                             if ($state === 'outgoing') $set('sender', null);
+
 
                             if ($state === 'outgoing') $set('recipient_id', null);
                             if ($state === 'incoming') $set('recipient', null);
@@ -72,7 +77,11 @@ class RSLAppForm
                         ->visible(fn ($get) => $get('subject1') === 'non purchasing')
                         ->required(fn ($get) => $get('subject1') === 'non purchasing'),
                     DatePicker::make('sender_date')
-                        ->label('Sender Date')
+                        ->label(fn ($get) => match ($get('mail_type')) {
+                            'incoming' => 'Sending Date',
+                            'outgoing' => 'Receiving Date',
+                            default => 'Sending Date',
+                        })
                         ->required(),
                     Select::make('sender_id')
                         ->label('Sender')
