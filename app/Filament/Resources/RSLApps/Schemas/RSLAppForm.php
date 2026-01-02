@@ -82,7 +82,7 @@ class RSLAppForm
                             'outgoing' => 'Receiving Date',
                             default => 'Sending Date',
                         })
-                        ->required(),
+                        ->required(fn ($get) => $get('mail_type') === 'incoming'),
                     Select::make('sender_id')
                         ->label('Sender')
                         ->relationship('senderContact', 'name')
