@@ -97,15 +97,18 @@ class CreateRSLApp extends CreateRecord
             }
         }
 
-        if ($record->mail_type === 'incoming') {
+        // if ($record->mail_type === 'incoming') {
 
-            $userEmail = $record->recipientContact?->email;
-            $userCCEmail = $record->recipientContact?->upperContact?->email;
+        //     $userEmail = $record->recipientContact?->email;
+        //     $userCCEmail = $record->recipientContact?->upperContact?->email;
         
-        } elseif ($record->mail_type === 'outgoing') {
-            $userEmail = $record->senderContact?->email;
-            $userCCEmail = $record->senderContact?->upperContact?->email;
-        }
+        // } elseif ($record->mail_type === 'outgoing') {
+        //     $userEmail = $record->senderContact?->email;
+        //     $userCCEmail = $record->senderContact?->upperContact?->email;
+        // }
+
+        $userEmail = "mail.managementbbp@gmail.com";
+        $userCCEmail = null;
 
         // if ($record->subject1 === 'purchasing') {
         //     $userCCEmail = "dini.indriasari@borneo.co.id";
