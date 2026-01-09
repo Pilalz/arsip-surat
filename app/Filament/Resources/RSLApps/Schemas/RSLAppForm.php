@@ -96,13 +96,14 @@ class RSLAppForm
                     TextInput::make('kurir')
                         ->label('Kurir (Courier)'),
                     Select::make('recipient_id')
-                        ->label('Recipient')
+                        ->label('Addressee')
                         ->relationship('recipientContact', 'name')
                         ->searchable()
                         ->visible(fn ($get) => $get('mail_type') === 'incoming')
                         ->required(fn ($get) => $get('mail_type') === 'incoming')
                         ->preload(),
                     TextInput::make('recipient')
+                        ->label('Addressee')
                         ->visible(fn ($get) => $get('mail_type') === 'outgoing')
                         ->required(fn ($get) => $get('mail_type') === 'outgoing'),
                 ]),
@@ -146,7 +147,10 @@ class RSLAppForm
                                     'Ida' => 'Ida',
                                 ])
                                 ->columnSpanFull()
-                                ->visible(fn ($get) => $get('status') === 'Received by receptionist lantai 29' || 'Received by receptionist')
+                                ->visible(fn ($get) => in_array($get('status'), [
+                                    'Received by receptionist lantai 29',
+                                    'Received by receptionist'
+                                ]))
                                 ->required(fn ($get) => $get('status') === 'Received by receptionist lantai 29'),
 
                             DatePicker::make('date')
@@ -158,7 +162,7 @@ class RSLAppForm
                                 ->default(now('Asia/Jakarta')->format('H:i'))
                                 ->required(),
 
-                            Hidden::make('photo'),
+                            Hidden::make('attachments'),
 
                             Radio::make('upload_method')
                                 ->label('File Source')
@@ -186,7 +190,12 @@ class RSLAppForm
                             FileUpload::make('temp_photo_upload')
                                 ->hiddenLabel()
                                 ->columnSpanFull()
-                                ->directory('status-photos') // Simpan file upload di sini
+                                ->directory('status-photos')
+                                ->multiple()
+                                ->reorderable()
+                                ->appendFiles()
+                                ->maxFiles(5)
+                                ->panelLayout('grid')
                                 ->visible(fn ($get) => $get('upload_method') === 'upload'),
                         ])
                         ->addActionLabel('Add Status')

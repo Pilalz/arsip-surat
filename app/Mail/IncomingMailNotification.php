@@ -31,8 +31,12 @@ class IncomingMailNotification extends Mailable
      */
     public function envelope(): Envelope
     {
+        $updaterName = $this->record->editor?->name ?? 'Unknown User';
+
+        $updateTime = $this->record->updated_at?->format('d/m/Y H:i') ?? now()->format('d/m/Y H:i');
+
         return new Envelope(
-            subject: 'Pemberitahuan Surat ' .  ($this->record->mail_type === "incoming" ? 'Masuk' : 'Keluar') . ' - ' . ($this->newStatus['status']) . ' - ' . $this->record->mail_number,
+            subject: 'Document ' .  ($this->record->mail_type === "incoming" ? 'Receipt' : 'Sent') . ' - RBR - ' . $updaterName . ' - ' . $updateTime,
         );
     }
 
@@ -53,18 +57,31 @@ class IncomingMailNotification extends Mailable
      */
     public function attachments(): array
     {
-        $photoPath = $this->newStatus['photo'] ?? null;
+        $attachments = [];
 
-        if ($photoPath && Storage::disk('local')->exists($photoPath)) {
+        // 1. Cek apakah ada key 'attachments' (Array) - Format Baru
+        if (!empty($this->newStatus['attachments']) && is_array($this->newStatus['attachments'])) {
             
-            $filename = basename($photoPath);
-            return [
-                Attachment::fromStorageDisk('local', $photoPath)
-                    ->as('Bukti-Status-' . $filename)
-                    ->withMime('image/jpeg'),
-            ];
+            foreach ($this->newStatus['attachments'] as $filePath) {
+                if (Storage::disk('local')->exists($filePath)) {
+                    $filename = basename($filePath);
+                    $attachments[] = Attachment::fromStorageDisk('local', $filePath)
+                        ->as('Lampiran-' . $filename);
+                }
+            }
+
+        } 
+        // 2. Fallback ke key 'photo' (String) - Jaga-jaga data lama
+        elseif (!empty($this->newStatus['photo']) && is_string($this->newStatus['photo'])) {
+            
+            $filePath = $this->newStatus['photo'];
+            if (Storage::disk('local')->exists($filePath)) {
+                $filename = basename($filePath);
+                $attachments[] = Attachment::fromStorageDisk('local', $filePath)
+                    ->as('Lampiran-' . $filename);
+            }
         }
 
-        return [];
+        return $attachments;
     }
 }

@@ -31,16 +31,20 @@ class EditRSLApp extends EditRecord
     protected function mutateFormDataBeforeFill(array $data): array
     {
         // 1. LOAD DATA MANUAL
-        // Karena repeater manual, kita harus ambil data anak dan masukkan ke array form
         $data['mailStatuses'] = $this->getRecord()->mailStatuses->toArray();
 
         // 2. PREVIEW FOTO LAMA
         if (isset($data['mailStatuses'])) {
             foreach ($data['mailStatuses'] as $key => $status) {
-                if (isset($status['photo']) && $status['photo']) {
-                    // Masukkan ke field upload agar muncul previewnya
-                    $data['mailStatuses'][$key]['temp_photo_upload'] = $status['photo'];
-                    // Set default tab ke upload
+                // Mapping attachments database ke temp_photo_upload agar muncul di form
+                if (isset($status['attachments']) && !empty($status['attachments'])) {
+                    $photos = $status['attachments'];
+                    
+                    if (is_string($photos)) {
+                        $photos = [$photos];
+                    }
+
+                    $data['mailStatuses'][$key]['temp_photo_upload'] = $photos;
                     $data['mailStatuses'][$key]['upload_method'] = 'upload';
                 }
             }
@@ -52,18 +56,26 @@ class EditRSLApp extends EditRecord
     protected function mutateFormDataBeforeSave(array $data): array
     {
         $statuses = $data['mailStatuses'] ?? [];
-
         $this->newStatusToEmail = [];
 
         foreach ($statuses as $key => $statusItem) {
-
             $isNewStatus = !isset($statusItem['rowid']);
+            $finalPhotos = [];
 
-            $photoData = $statusItem['temp_photo_camera'] ?? $statusItem['temp_photo_upload'] ?? null;
+            // A. Cek Upload (Ini menghandle file BARU dan file LAMA yg dibiarkan user)
+            // Filament FileUpload otomatis mengirim path file lama jika tidak dihapus user
+            if (!empty($statusItem['temp_photo_upload'])) {
+                $uploaded = $statusItem['temp_photo_upload'];
+                if (is_array($uploaded)) {
+                    $finalPhotos = array_merge($finalPhotos, $uploaded);
+                } else {
+                    $finalPhotos[] = $uploaded;
+                }
+            }
 
-            $finalFileName = $statusItem['photo'] ?? null;
-
-            if ($photoData) {
+            // B. Cek Kamera
+            if (!empty($statusItem['temp_photo_camera'])) {
+                $photoData = $statusItem['temp_photo_camera'];
                 if (preg_match('/^data:image\/(\w+);base64,/', $photoData, $type)) {
                     $base64Data = substr($photoData, strpos($photoData, ',') + 1);
                     $extension = strtolower($type[1]);
@@ -71,20 +83,21 @@ class EditRSLApp extends EditRecord
                     if ($fileData !== false) {
                         $fileName = 'status-photos/' . Str::random(40) . '.' . $extension;
                         Storage::disk('local')->put($fileName, $fileData);
-                        $finalFileName = $fileName;
+                        $finalPhotos[] = $fileName;
                     }
-                } else {
-                    // Ini path file (baru upload atau existing)
-                    $finalFileName = $photoData;
                 }
             }
 
-            $statuses[$key]['photo'] = $finalFileName;
+            // C. Final Assignment
+            // Jika kosong, biarkan kosong (Optional)
+            $statuses[$key]['attachments'] = $finalPhotos;
 
+            // Bersihkan
             unset($statuses[$key]['temp_photo_camera']);
             unset($statuses[$key]['temp_photo_upload']);
             unset($statuses[$key]['upload_method']);
             unset($statuses[$key]['rowid']); 
+            unset($statuses[$key]['photo']); // Bersihkan legacy key
 
             if ($isNewStatus) {
                 $this->newStatusToEmail[] = $statuses[$key];
@@ -94,19 +107,15 @@ class EditRSLApp extends EditRecord
         $this->tempStatuses = $statuses;
         unset($data['mailStatuses']);
 
+        // Handle Names
         if (!empty($data['sender_id'])) {
             $contact = Contact::find($data['sender_id']);
-            if ($contact) {
-                $data['sender'] = $contact->name; // Simpan nama ke kolom sender
-            }
+            if ($contact) $data['sender'] = $contact->name;
         }
 
-        // Jika Recipient ID diisi, ambil namanya
         if (!empty($data['recipient_id'])) {
             $contact = Contact::find($data['recipient_id']);
-            if ($contact) {
-                $data['recipient'] = $contact->name; // Simpan nama ke kolom recipient
-            }
+            if ($contact) $data['recipient'] = $contact->name;
         }
 
         return $data;
@@ -116,6 +125,7 @@ class EditRSLApp extends EditRecord
     {
         $record = $this->getRecord();
 
+        // Hapus status lama dan buat ulang (Cara paling aman untuk repeater manual)
         $record->mailStatuses()->delete();
 
         if (!empty($this->tempStatuses)) {
@@ -124,8 +134,9 @@ class EditRSLApp extends EditRecord
                     'status' => $status['status'],
                     'date'   => $status['date'],
                     'time'   => $status['time'],
-                    'photo'  => $status['photo'] ?? null,
-                    'recipient'   => $status['recipient'] ?? null,
+                    // Gunakan null coalescing operator untuk handle null/array kosong
+                    'attachments'  => $status['attachments'] ?? [], 
+                    'recipient' => $status['recipient'] ?? null,
                 ]);
             }
         }

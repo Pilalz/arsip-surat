@@ -13,13 +13,20 @@ class MailStatus extends Model
 
     protected $primaryKey = 'rowid';
 
-    protected $fillable = [
-        'mail_id',
-        'date',
-        'time',
-        'status',
-        'photo',
-        'recipient',
+    protected $guarded = [];
+
+    // protected $fillable = [
+    //     'mail_id',
+    //     'date',
+    //     'time',
+    //     'status',
+    //     'photo',
+    //     'recipient',
+    //     'attachments',
+    // ];
+
+    protected $casts = [
+        'attachments' => 'array',
     ];
 
     public function rslApp()

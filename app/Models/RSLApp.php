@@ -8,13 +8,14 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\Storage;
 use App\Models\Contact;
 use App\Models\MailStatus;
+use Illuminate\Support\Facades\Auth;
 
 class RSLApp extends Model
 {
     protected $table = 'RSLApp';
 
     // Kalau di tabel sana GAK ADA kolom created_at & updated_at, set ini jadi false
-    public $timestamps = false; 
+    public $timestamps = true; 
 
     protected $primaryKey = 'mail_id';
 
@@ -36,6 +37,20 @@ class RSLApp extends Model
 
     protected static function booted(): void
     {
+        static::creating(function ($model) {
+            if (Auth::check()) {
+                $model->created_by = Auth::id();
+                $model->updated_by = Auth::id();
+            }
+        });
+
+        // Event saat data LAMA akan diupdate (Updating)
+        static::updating(function ($model) {
+            if (Auth::check()) {
+                $model->updated_by = Auth::id();
+            }
+        });
+
         static::deleting(function (RSLApp $rslApp) {
             
             // 1. Loop semua status anak (mailStatuses)
@@ -71,4 +86,14 @@ class RSLApp extends Model
         return $this->hasMany(MailStatus::class, 'mail_id', 'mail_id');
     }
 
+    public function creator(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
+
+    // Relasi ke User pengedit (Ini yang kita butuhkan)
+    public function editor(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'updated_by');
+    }
 }

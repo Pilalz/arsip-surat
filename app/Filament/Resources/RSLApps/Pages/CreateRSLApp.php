@@ -11,56 +11,88 @@ use App\Models\Contact;
 use App\Mail\IncomingMailNotification;
 use Illuminate\Support\Facades\Mail;
 
+use Filament\Support\Facades\FilamentView;
+use Filament\View\PanelsRenderHook;
+
 class CreateRSLApp extends CreateRecord
 {
     protected static string $resource = RSLAppResource::class;
 
     protected static ?string $title = 'Input';
 
-    protected array $tempStatuses = [];
+    protected array $tempStatuses = [];    
+
+    public function mount(): void
+    {
+        parent::mount();
+
+        // Register Hook KHUSUS untuk halaman ini (ListCategories::class)
+        FilamentView::registerRenderHook(
+            PanelsRenderHook::HEAD_END,
+            fn (): string => '<style>
+                .fi-main {
+                    margin: 1px 1px !important;
+                }
+                .fi-page-header-main-ctn {
+                    row-gap: 10px !important;
+                }
+                .fi-header-heading {
+                    font-size: 20px !important;
+                }
+                .fi-sc-form {
+                    gap: 1px !important;
+                }
+                .fi-sc {
+                    margin: 0px !important;
+                    gap: 15px !important;
+                }
+            </style>',
+            scopes: [static::class]
+        );
+    }
 
     protected function mutateFormDataBeforeCreate(array $data): array
     {
         $statuses = $data['mailStatuses'] ?? [];
 
-        // 3. Proses Foto (Logic Loop yang tadi)
         foreach ($statuses as $key => $statusItem) {
-            // Ambil data foto dari salah satu sumber
-            $photoData = $statusItem['temp_photo_camera'] ?? $statusItem['temp_photo_upload'] ?? null;
-            $finalFileName = null;
+            $finalFiles = [];
 
-            if ($photoData) {
-                // Cek Base64 (Dari Kamera)
+            if (!empty($statusItem['temp_photo_upload'])) {
+                $uploaded = $statusItem['temp_photo_upload'];
+                if (is_array($uploaded)) {
+                    $finalFiles = array_merge($finalFiles, $uploaded);
+                } else {
+                    $finalFiles[] = $uploaded;
+                }
+            }
+
+            if (!empty($statusItem['temp_photo_camera'])) {
+                $photoData = $statusItem['temp_photo_camera'];
                 if (preg_match('/^data:image\/(\w+);base64,/', $photoData, $type)) {
                     $base64Data = substr($photoData, strpos($photoData, ',') + 1);
                     $extension = strtolower($type[1]);
                     $fileData = base64_decode($base64Data);
 
                     if ($fileData !== false) {
-                        $fileName = 'status-photos/' . Str::random(40) . '.' . $extension;
+                        $fileName = 'status-attachments/' . Str::random(40) . '.' . $extension;
                         Storage::disk('local')->put($fileName, $fileData);
-                        $finalFileName = $fileName;
+                        $finalFiles[] = $fileName;
                     }
-                } 
-                // Cek jika Upload Biasa (sudah berupa path)
-                else {
-                    $finalFileName = $photoData;
                 }
             }
 
-            // Simpan nama file foto ke array lokal
-            $statuses[$key]['photo'] = $finalFileName;            
+            $statuses[$key]['attachments'] = $finalFiles;          
 
             // Hapus field sampah agar bersih
             unset($statuses[$key]['temp_photo_camera']);
             unset($statuses[$key]['temp_photo_upload']);
             unset($statuses[$key]['upload_method']);
+            unset($statuses[$key]['photo']);
         }
 
         // Simpan ke Property Class untuk dipakai di afterCreate
         $this->tempStatuses = $statuses;
-
-        // HAPUS dari $data utama agar tidak error SQL (karena kolom mailStatuses tidak ada di tabel RSLApp)
         unset($data['mailStatuses']);
 
         if (!empty($data['sender_id'])) {
@@ -87,13 +119,14 @@ class CreateRSLApp extends CreateRecord
 
         if (!empty($this->tempStatuses)) {
             foreach ($this->tempStatuses as $status) {
-                // Buat baris baru di table anak
+                // Pastikan Model MailStatus punya protected $guarded = [];
                 $record->mailStatuses()->create([
                     'status' => $status['status'],
                     'date'   => $status['date'],
                     'time'   => $status['time'],
-                    'photo'  => $status['photo'] ?? null,
-                    'recipient'   => $status['recipient'] ?? null,
+                    // Jika kosong, simpan sebagai array kosong []
+                    'attachments'  => $status['attachments'] ?? [], 
+                    'recipient' => $status['recipient'] ?? null,
                 ]);
             }
         }
