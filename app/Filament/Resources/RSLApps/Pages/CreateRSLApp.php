@@ -93,6 +93,7 @@ class CreateRSLApp extends CreateRecord
                     'date'   => $status['date'],
                     'time'   => $status['time'],
                     'photo'  => $status['photo'] ?? null,
+                    'recipient'   => $status['recipient'] ?? null,
                 ]);
             }
         }

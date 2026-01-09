@@ -125,6 +125,7 @@ class EditRSLApp extends EditRecord
                     'date'   => $status['date'],
                     'time'   => $status['time'],
                     'photo'  => $status['photo'] ?? null,
+                    'recipient'   => $status['recipient'] ?? null,
                 ]);
             }
         }

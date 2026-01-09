@@ -74,6 +74,11 @@ class RSLAppInfolist
                                             ->state(function ($record) {
                                                 return $record->senderContact->name ?? $record->sender;
                                             }),
+
+                                        TextEntry::make('kurir')
+                                            ->label('Nama Kurir')
+                                            ->weight(FontWeight::SemiBold)
+                                            ->placeholder('-'),                                        
                                         
                                         TextEntry::make('sender_date')
                                             ->label('Tanggal Kirim')
@@ -123,6 +128,10 @@ class RSLAppInfolist
                                             ->label('Lampiran Bukti') // Label kolom
                                             ->hiddenLabel()
                                             ->view('infolists.components.lightbox-image'),
+
+                                        TextEntry::make('recipient')
+                                            ->icon('heroicon-m-user')
+                                            ->visible(fn ($state) => filled($state)),
                                     ])
                                     ->columnSpanFull(),
                             ])

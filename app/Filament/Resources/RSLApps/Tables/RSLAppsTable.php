@@ -51,15 +51,35 @@ class RSLAppsTable
                     ->placeholder('-'),
 
                 TextColumn::make('sender_info')
-                    ->label('Sender')
+                ->label('Sender')
+                ->searchable(query: function (Builder $query, string $search) {
+                    $query->where(function ($subQuery) use ($search) {
+                        $subQuery->where('sender', 'ilike', "%{$search}%")
+                            ->orWhereHas('senderContact', function ($relQuery) use ($search) {
+                                $relQuery->where('name', 'ilike', "%{$search}%");
+                            });
+                    });
+                })
+                ->state(function ($record) {
+                    return $record->senderContact->name ?? $record->sender;
+                }),
+
+                TextColumn::make('kurir')
+                    ->label('Kurir (Courier)')
                     ->searchable()
-                    ->state(function ($record) {
-                        return $record->senderContact->name ?? $record->sender;
-                    }),
+                    ->placeholder('-')
+                    ->toggleable(isToggledHiddenByDefault: true),
 
                 TextColumn::make('recipient_info')
                     ->label('Recipient')
-                    ->searchable()
+                    ->searchable(query: function (Builder $query, string $search) {
+                        $query->where(function ($subQuery) use ($search) {
+                            $subQuery->where('recipient', 'ilike', "%{$search}%")
+                                ->orWhereHas('recipientContact', function ($relQuery) use ($search) {
+                                    $relQuery->where('name', 'ilike', "%{$search}%");
+                                });
+                        });
+                    })
                     ->state(function ($record) {
                         return $record->recipientContact->name ?? $record->recipient;
                     }),

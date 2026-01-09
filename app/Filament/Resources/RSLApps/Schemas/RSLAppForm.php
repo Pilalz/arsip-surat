@@ -93,6 +93,8 @@ class RSLAppForm
                     TextInput::make('sender')
                         ->visible(fn ($get) => $get('mail_type') === 'incoming')
                         ->required(fn ($get) => $get('mail_type') === 'incoming'),
+                    TextInput::make('kurir')
+                        ->label('Kurir (Courier)'),
                     Select::make('recipient_id')
                         ->label('Recipient')
                         ->relationship('recipientContact', 'name')
@@ -122,15 +124,37 @@ class RSLAppForm
                                 ->searchable()
                                 ->required()
                                 ->columnSpanFull()
+                                ->live()
+                                ->afterStateUpdated(function ($state, $set) {
+                                    if ($state === 'Received by user') {
+                                        $set('recipient', null);
+                                    }
+                                })
                                 ->options(fn () => MailMaster::where('owner', 'mailStatus.status')->orderBy('seq')
                                     ->pluck('item_name', 'item_name')
                                 ),
 
-                            Hidden::make('date')
+                            Select::make('recipient')
+                                ->options([
+                                    'Mila' => 'Mila',
+                                    'Dayat' => 'Dayat',
+                                    'Hendri' => 'Hendri',
+                                    'Manto' => 'Manto',
+                                    'Zaenal' => 'Zaenal',
+                                    'Lilik' => 'Lilik',
+                                    'Ayu' => 'Ayu',
+                                    'Ida' => 'Ida',
+                                ])
+                                ->columnSpanFull()
+                                ->visible(fn ($get) => $get('status') === 'Received by receptionist lantai 29' || 'Received by receptionist')
+                                ->required(fn ($get) => $get('status') === 'Received by receptionist lantai 29'),
+
+                            DatePicker::make('date')
                                 ->default(now())
                                 ->required(),
 
-                            Hidden::make('time')
+                            TimePicker::make('time')
+                                ->seconds(false)
                                 ->default(now('Asia/Jakarta')->format('H:i'))
                                 ->required(),
 

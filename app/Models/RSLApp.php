@@ -31,6 +31,7 @@ class RSLApp extends Model
         'recipient',
         'sender_date',
         'photo',
+        'kurir',
     ];
 
     protected static function booted(): void

@@ -19,6 +19,7 @@ class MailStatus extends Model
         'time',
         'status',
         'photo',
+        'recipient',
     ];
 
     public function rslApp()
