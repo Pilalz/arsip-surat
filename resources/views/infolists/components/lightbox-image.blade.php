@@ -44,7 +44,7 @@
 
             {{-- SKENARIO 2: PDF --}}
             @elseif($isPdf)
-                <div class="flex flex-col items-center justify-center p-2 border rounded-lg w-[100px] h-[100px] bg-gray-50">
+                <div class="flex flex-col items-center justify-center p-2 border rounded-lg w-25 h-25 bg-gray-50">
                     <x-heroicon-m-document-text class="w-8 h-8 text-red-500 mb-1"/>
                     <a href="{{ $fileUrl }}" target="_blank" class="text-xs text-center text-primary-600 hover:underline break-all">
                         Open PDF
@@ -53,7 +53,7 @@
 
             {{-- SKENARIO 3: LAINNYA --}}
             @else
-                <a href="{{ $fileUrl }}" target="_blank" class="flex flex-col items-center justify-center p-2 border rounded-lg w-[100px] h-[100px] hover:bg-gray-50 transition">
+                <a href="{{ $fileUrl }}" target="_blank" class="flex flex-col items-center justify-center p-2 border rounded-lg w-25 h-25 hover:bg-gray-50 transition">
                     <x-heroicon-m-document class="w-8 h-8 text-gray-500 mb-1"/>
                     <span class="text-[10px] text-gray-500 uppercase">{{ $extension }}</span>
                 </a>

@@ -27,28 +27,28 @@ class CreateRSLApp extends CreateRecord
         parent::mount();
 
         // Register Hook KHUSUS untuk halaman ini (ListCategories::class)
-        FilamentView::registerRenderHook(
-            PanelsRenderHook::HEAD_END,
-            fn (): string => '<style>
-                .fi-main {
-                    margin: 1px 1px !important;
-                }
-                .fi-page-header-main-ctn {
-                    row-gap: 10px !important;
-                }
-                .fi-header-heading {
-                    font-size: 20px !important;
-                }
-                .fi-sc-form {
-                    gap: 1px !important;
-                }
-                .fi-sc {
-                    margin: 0px !important;
-                    gap: 15px !important;
-                }
-            </style>',
-            scopes: [static::class]
-        );
+        // FilamentView::registerRenderHook(
+        //     PanelsRenderHook::HEAD_END,
+        //     fn (): string => '<style>
+        //         .fi-main {
+        //             margin: 1px 1px !important;
+        //         }
+        //         .fi-page-header-main-ctn {
+        //             row-gap: 10px !important;
+        //         }
+        //         .fi-header-heading {
+        //             font-size: 20px !important;
+        //         }
+        //         .fi-sc-form {
+        //             gap: 1px !important;
+        //         }
+        //         .fi-sc {
+        //             margin: 0px !important;
+        //             gap: 15px !important;
+        //         }
+        //     </style>',
+        //     scopes: [static::class]
+        // );
     }
 
     protected function mutateFormDataBeforeCreate(array $data): array

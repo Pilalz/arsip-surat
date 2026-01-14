@@ -5,7 +5,7 @@
 </head>
 <body style="font-family: Arial, sans-serif;">
 
-    <h2>Dear, {{  $record->mail_type === "incoming" ? $record->recipientContact->name : $record->senderContact->name }}</h2>
+    <h2>Dear {{  $record->mail_type === "incoming" ? $record->recipientContact->name : $record->senderContact->name }}</h2>
 
     <p>Anda telah {{ $record->mail_type === "incoming" ? 'menerima surat masuk baru' : 'mengirim surat' }}  yang telah diarsipkan ke dalam sistem.</p>
 
@@ -15,12 +15,12 @@
             <td>: {{ $record->mail_number }}</td>
         </tr>
         <tr>
-            <td><strong>{{ $record->mail_type === "incoming" ? 'Pengirim' : 'Penerima' }}</strong></td>
-            <td>: {{ $record->mail_type === "incoming" ? $record->sender : $record->recipient }}</td>
-        </tr>
-        <tr>
             <td><strong>Tanggal Surat</strong></td>
             <td>: {{ \Carbon\Carbon::parse($record->date)->format('d M Y') }}</td>
+        </tr>
+        <tr>
+            <td><strong>{{ $record->mail_type === "incoming" ? 'Pengirim' : 'Penerima' }}</strong></td>
+            <td>: {{ $record->mail_type === "incoming" ? $record->sender : $record->recipient }}</td>
         </tr>
         <tr>
             <td><strong>Perihal</strong></td>

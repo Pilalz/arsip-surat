@@ -30,16 +30,8 @@ class RSLAppForm
             ->components([
                 Section::make('Mail Detail') 
                 ->schema([
-                    TextInput::make('mail_number')
+                    TextInput::make('mail_number')                
                     ->required(),
-                    DatePicker::make('date')
-                        ->label(fn ($get) => match ($get('mail_type')) {
-                            'incoming' => 'Receiving Date',
-                            'outgoing' => 'Sending Date',
-                            default => 'Receiving Date',
-                        })
-                        ->default(today())
-                        ->required(),
                     Select::make('mail_type')
                         ->label('Mail Category')
                         ->options([
@@ -58,6 +50,21 @@ class RSLAppForm
                             if ($state === 'outgoing') $set('recipient_id', null);
                             if ($state === 'incoming') $set('recipient', null);
                         }),
+                    DatePicker::make('date')
+                        ->label(fn ($get) => match ($get('mail_type')) {
+                            'incoming' => 'Receiving Date',
+                            'outgoing' => 'Sending Date',
+                            default => 'Receiving Date',
+                        })
+                        ->default(today())
+                        ->required(),
+                    DatePicker::make('sender_date')
+                        ->label(fn ($get) => match ($get('mail_type')) {
+                            'incoming' => 'Sending Date',
+                            'outgoing' => 'Receiving Date',
+                            default => 'Sending Date',
+                        })
+                        ->required(fn ($get) => $get('mail_type') === 'incoming'),
                     Select::make('subject1')
                         ->label('Subject 1')
                         ->options([
@@ -76,13 +83,6 @@ class RSLAppForm
                         ->label('Subject 2')
                         ->visible(fn ($get) => $get('subject1') === 'non purchasing')
                         ->required(fn ($get) => $get('subject1') === 'non purchasing'),
-                    DatePicker::make('sender_date')
-                        ->label(fn ($get) => match ($get('mail_type')) {
-                            'incoming' => 'Sending Date',
-                            'outgoing' => 'Receiving Date',
-                            default => 'Sending Date',
-                        })
-                        ->required(fn ($get) => $get('mail_type') === 'incoming'),
                     Select::make('sender_id')
                         ->label('Sender')
                         ->relationship('senderContact', 'name')
@@ -106,20 +106,15 @@ class RSLAppForm
                         ->label('Addressee')
                         ->visible(fn ($get) => $get('mail_type') === 'outgoing')
                         ->required(fn ($get) => $get('mail_type') === 'outgoing'),
-                ]),
-                // Opsional: Hilangkan shadow bawaan section kalau mau flat
-                // ->compact() 
+                ])
+                ->columns(2)
+                ->compact(),
 
                 Section::make('Status & Attachment') 
                 ->schema([
-                    // CameraField::make('photo')
-                    //         ->label('Ambil Foto')
-                    //         ->required()
-
                     Repeater::make('mailStatuses')
                         ->hiddenLabel()
-                        ->schema([
-                            
+                        ->schema([                        
                             // --- PILIH STATUS DARI TABLE MAILMASTER ---
                             Select::make('status')
                                 ->searchable()
@@ -201,12 +196,13 @@ class RSLAppForm
                         ->addActionLabel('Add Status')
                         ->defaultItems(1)
                         ->columns(2)
+                        ->compact()
                             ]),
 
-                ViewField::make('camera_script')
-                    ->view('filament.components.camera-script')
-                    ->hiddenLabel()
-                    ->dehydrated(false),
-        ]);
+                    ViewField::make('camera_script')
+                        ->view('filament.components.camera-script')
+                        ->hiddenLabel()
+                        ->dehydrated(false),
+                ]);
     }
 }
