@@ -59,7 +59,7 @@ class RSLAppInfolist
                                 TextEntry::make('subject2')
                                     ->label('Keterangan Tambahan')
                                     ->placeholder('-')
-                                    ->visible(fn ($record) => $record->subject2), 
+                                    ->visible(), 
                             ]),
                         
                         Grid::make(2)

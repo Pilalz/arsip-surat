@@ -73,15 +73,10 @@ class RSLAppForm
                         ])
                         ->required()
                         ->live()
-                        ->native(true)
-                        ->afterStateUpdated(function ($state, $set) {
-                            if ($state === 'purchasing') {
-                                $set('subject2', null);
-                            }
-                        }),
+                        ->native(true),
                     TextInput::make('subject2')
                         ->label('Subject 2')
-                        ->visible(fn ($get) => $get('subject1') === 'non purchasing')
+                        ->visible()
                         ->required(fn ($get) => $get('subject1') === 'non purchasing'),
                     Select::make('sender_id')
                         ->label('Sender')
