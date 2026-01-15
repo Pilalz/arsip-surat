@@ -158,9 +158,16 @@ class EditRSLApp extends EditRecord
             // if ($record->subject1 === 'purchasing') {
             //     $userCCEmail = "dini.indriasari@borneo.co.id";
             
-            // } elseif ($record->subject1 === 'outgoing') {
+            // } elseif ($record->subject1 === 'non purchasing') {
             //     $userCCEmail = "erry.nurima@borneo.co.id"; 
             // }
+
+            if ($record->subject1 === 'purchasing') {
+                $userCCEmail = "mail.admin01@bagasbumipersada.co.id";
+            
+            } elseif ($record->subject1 === 'non purchasing') {
+                $userCCEmail = "mail.admin02@bagasbumipersada.co.id";
+            }
             
             if ($userEmail) {
                 foreach ($this->newStatusToEmail as $newStatus) {
