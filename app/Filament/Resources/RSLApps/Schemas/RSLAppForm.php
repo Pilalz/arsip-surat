@@ -185,6 +185,7 @@ class RSLAppForm
                                 ->reorderable()
                                 ->appendFiles()
                                 ->maxFiles(5)
+                                ->maxSize(2048)
                                 ->panelLayout('grid')
                                 ->visible(fn ($get) => $get('upload_method') === 'upload'),
                         ])
