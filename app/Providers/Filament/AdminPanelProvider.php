@@ -35,6 +35,7 @@ class AdminPanelProvider extends PanelProvider
             ->maxContentWidth('full')
             ->login()
             ->brandName('Mail Management')
+            ->globalSearch(false)
             // ->brandLogo(asset('images/logo-perusahaan.png'))
             // ->brandLogoHeight('3rem')
             ->renderHook(
