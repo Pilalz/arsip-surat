@@ -19,7 +19,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        if (config('app.env') === 'local') {
+        if (app()->environment('local') || true) { 
             stream_context_set_default([
                 'ssl' => [
                     'verify_peer' => false,
