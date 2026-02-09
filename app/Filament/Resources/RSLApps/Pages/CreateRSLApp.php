@@ -6,6 +6,7 @@ use App\Filament\Resources\RSLApps\RSLAppResource;
 use Filament\Resources\Pages\CreateRecord;
 use Filament\Notifications\Notification;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use App\Models\Contact;
 use App\Mail\IncomingMailNotification;
@@ -20,7 +21,7 @@ class CreateRSLApp extends CreateRecord
 
     protected static ?string $title = 'Input';
 
-    protected array $tempStatuses = [];    
+    protected array $tempStatuses = [];
 
     public function mount(): void
     {
@@ -82,7 +83,7 @@ class CreateRSLApp extends CreateRecord
                 }
             }
 
-            $statuses[$key]['attachments'] = $finalFiles;          
+            $statuses[$key]['attachments'] = $finalFiles;
 
             // Hapus field sampah agar bersih
             unset($statuses[$key]['temp_photo_camera']);
@@ -135,7 +136,7 @@ class CreateRSLApp extends CreateRecord
 
         //     $userEmail = $record->recipientContact?->email;
         //     $userCCEmail = $record->recipientContact?->upperContact?->email;
-        
+
         // } elseif ($record->mail_type === 'outgoing') {
         //     $userEmail = $record->senderContact?->email;
         //     $userCCEmail = $record->senderContact?->upperContact?->email;
@@ -146,15 +147,15 @@ class CreateRSLApp extends CreateRecord
 
         // if ($record->subject1 === 'purchasing') {
         //     $userCCEmail = "dini.indriasari@borneo.co.id";
-        
+
         // } elseif ($record->subject1 === 'non purchasing') {
         //     $userCCEmail = "erry.nurima@borneo.co.id";
-            
+
         // }
 
         if ($record->subject1 === 'purchasing') {
             $userCCEmail = "mail.admin01@bagasbumipersada.co.id";
-        
+
         } elseif ($record->subject1 === 'non purchasing') {
             $userCCEmail = "mail.admin02@bagasbumipersada.co.id";
         }
@@ -170,14 +171,24 @@ class CreateRSLApp extends CreateRecord
                 $latestStatus = !empty($this->tempStatuses) ? end($this->tempStatuses) : [];
 
                 $mail->send(new IncomingMailNotification($record, $latestStatus));
-                
+
                 Notification::make()
                     ->title('Email terkirim ke ' . $userEmail)
                     ->body($userCCEmail ? "(CC ke atasan: $userCCEmail)" : null)
                     ->success()
                     ->send();
-                    
+
             } catch (\Exception $e) {
+                // Log error ke file log
+                Log::error('Gagal mengirim email notifikasi surat masuk', [
+                    'error' => $e->getMessage(),
+                    'trace' => $e->getTraceAsString(),
+                    'record_id' => $record->id,
+                    'email_to' => $userEmail,
+                    'email_cc' => $userCCEmail,
+                    'subject1' => $record->subject1,
+                ]);
+
                 Notification::make()
                     ->title('Gagal mengirim email')
                     ->body($e->getMessage())

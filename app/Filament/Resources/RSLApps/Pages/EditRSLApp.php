@@ -7,6 +7,7 @@ use Filament\Actions\DeleteAction;
 use Filament\Actions\ViewAction;
 use Filament\Resources\Pages\EditRecord;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use App\Models\Contact;
 use App\Mail\IncomingMailNotification;
@@ -39,7 +40,7 @@ class EditRSLApp extends EditRecord
                 // Mapping attachments database ke temp_photo_upload agar muncul di form
                 if (isset($status['attachments']) && !empty($status['attachments'])) {
                     $photos = $status['attachments'];
-                    
+
                     if (is_string($photos)) {
                         $photos = [$photos];
                     }
@@ -96,7 +97,7 @@ class EditRSLApp extends EditRecord
             unset($statuses[$key]['temp_photo_camera']);
             unset($statuses[$key]['temp_photo_upload']);
             unset($statuses[$key]['upload_method']);
-            unset($statuses[$key]['rowid']); 
+            unset($statuses[$key]['rowid']);
             unset($statuses[$key]['photo']); // Bersihkan legacy key
 
             if ($isNewStatus) {
@@ -146,7 +147,7 @@ class EditRSLApp extends EditRecord
             // if ($record->mail_type === 'incoming') {
             //     $userEmail = $record->recipientContact?->email;
             //     $userCCEmail = $record->recipientContact?->upperContact?->email;
-            
+
             // } elseif ($record->mail_type === 'outgoing') {
             //     $userEmail = $record->senderContact?->email;
             //     $userCCEmail = $record->senderContact?->upperContact?->email;
@@ -157,18 +158,18 @@ class EditRSLApp extends EditRecord
 
             // if ($record->subject1 === 'purchasing') {
             //     $userCCEmail = "dini.indriasari@borneo.co.id";
-            
+
             // } elseif ($record->subject1 === 'non purchasing') {
             //     $userCCEmail = "erry.nurima@borneo.co.id"; 
             // }
 
             if ($record->subject1 === 'purchasing') {
                 $userCCEmail = "mail.admin01@bagasbumipersada.co.id";
-            
+
             } elseif ($record->subject1 === 'non purchasing') {
                 $userCCEmail = "mail.admin02@bagasbumipersada.co.id";
             }
-            
+
             if ($userEmail) {
                 foreach ($this->newStatusToEmail as $newStatus) {
                     try {
@@ -186,8 +187,19 @@ class EditRSLApp extends EditRecord
                             ->body($userCCEmail ? "(CC ke atasan: $userCCEmail)" : null)
                             ->success()
                             ->send();
-                        
+
                     } catch (\Exception $e) {
+                        // Log error ke file log
+                        Log::error('Gagal mengirim email notifikasi status baru', [
+                            'error' => $e->getMessage(),
+                            'trace' => $e->getTraceAsString(),
+                            'record_id' => $record->id,
+                            'email_to' => $userEmail,
+                            'email_cc' => $userCCEmail,
+                            'subject1' => $record->subject1,
+                            'new_status' => $newStatus,
+                        ]);
+
                         Notification::make()
                             ->title('Gagal mengirim email')
                             ->body($e->getMessage())
