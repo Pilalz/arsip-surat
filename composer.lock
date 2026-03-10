@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "c22af36b919cb227652ac4338c049117",
+    "content-hash": "3883f1ed6ad5b05743d7b44bd438d3f4",
     "packages": [
         {
             "name": "anourvalar/eloquent-serialize",
@@ -682,6 +682,80 @@
                 }
             ],
             "time": "2024-07-16T11:13:48+00:00"
+        },
+        {
+            "name": "croustibat/filament-jobs-monitor",
+            "version": "v4.1.2",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/ultraviolettes/filament-jobs-monitor.git",
+                "reference": "669ea2bb4ac01a27987b87ae4801641b00033078"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/ultraviolettes/filament-jobs-monitor/zipball/669ea2bb4ac01a27987b87ae4801641b00033078",
+                "reference": "669ea2bb4ac01a27987b87ae4801641b00033078",
+                "shasum": ""
+            },
+            "require": {
+                "filament/filament": "^4.0|^5.0",
+                "illuminate/contracts": "^10.0|^11.0|^12.0",
+                "php": "^8.2|^8.3|^8.4",
+                "spatie/laravel-package-tools": "^1.13.5"
+            },
+            "require-dev": {
+                "laravel/pint": "^1.0"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "aliases": {
+                        "QueueMonitor": "Croustibat\\FilamentJobsMonitor\\QueueMonitorProvider\\Facade"
+                    },
+                    "providers": [
+                        "Croustibat\\FilamentJobsMonitor\\FilamentJobsMonitorServiceProvider",
+                        "Croustibat\\FilamentJobsMonitor\\QueueMonitorProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Croustibat\\FilamentJobsMonitor\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Baptiste",
+                    "email": "baptiste@dark-matter.fr",
+                    "role": "Developer"
+                }
+            ],
+            "description": "Background Jobs monitoring like Horizon for all drivers for FilamentPHP",
+            "homepage": "https://github.com/ultraviolettes/filament-jobs-monitor",
+            "keywords": [
+                "background-jobs",
+                "filament",
+                "filament-plugin",
+                "jobs",
+                "laravel",
+                "monitor",
+                "queue"
+            ],
+            "support": {
+                "issues": "https://github.com/ultraviolettes/filament-jobs-monitor/issues",
+                "source": "https://github.com/ultraviolettes/filament-jobs-monitor/tree/v4.1.2"
+            },
+            "funding": [
+                {
+                    "url": "https://github.com/croustibat",
+                    "type": "github"
+                }
+            ],
+            "time": "2026-01-20T19:10:34+00:00"
         },
         {
             "name": "danharrin/date-format-converter",

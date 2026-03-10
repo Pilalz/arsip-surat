@@ -3,6 +3,9 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Facades\Gate;
+use Croustibat\FilamentJobsMonitor\Models\QueueMonitor;
+use App\Policies\QueueMonitorPolicy;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -19,6 +22,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        Gate::policy(QueueMonitor::class, QueueMonitorPolicy::class);
         if (app()->environment('local') || true) { 
             stream_context_set_default([
                 'ssl' => [

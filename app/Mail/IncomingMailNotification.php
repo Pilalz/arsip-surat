@@ -12,7 +12,7 @@ use Illuminate\Queue\SerializesModels;
 use App\Models\RSLApp;
 use Illuminate\Support\Facades\Storage;
 
-class IncomingMailNotification extends Mailable
+class IncomingMailNotification extends Mailable implements ShouldQueue
 {
     use Queueable, SerializesModels;
 
