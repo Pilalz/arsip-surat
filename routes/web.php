@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\VerifyPasswordController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
 
@@ -27,3 +28,8 @@ Route::get('/private-image/{filename}', function ($filename) {
     return Storage::disk('local')->response($path);
 
 })->name('view.private.image');
+
+// Verifikasi password user sebelum membuka file PDF sensitif
+Route::post('/verify-password', VerifyPasswordController::class)
+    ->middleware('auth')
+    ->name('verify.password');
