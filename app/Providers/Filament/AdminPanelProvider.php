@@ -6,6 +6,7 @@ use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
+use App\Filament\Pages\Profile;
 use Filament\Pages\Dashboard;
 use Filament\Panel;
 use Filament\PanelProvider;
@@ -35,6 +36,7 @@ class AdminPanelProvider extends PanelProvider
             ->font('Poppins')
             ->maxContentWidth('full')
             ->login()
+            ->profile(Profile::class)
             ->brandName('Mail Management')
             ->globalSearch(false)
             // ->brandLogo(asset('images/logo-perusahaan.png'))
